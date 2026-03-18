@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solaris Atlas</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+      <aside class="hud glass">
+        <div class="brand">
+          <p class="eyebrow">Interactive Orrery</p>
+          <h1>Solaris Atlas</h1>
+          <p class="subtitle">可自由飞行、时间驱动、可着陆的精细 3D 太阳系</p>
+        </div>
+
+        <section class="status-banner" id="cursorHint">
+          鼠标未锁定：点击右侧宇宙画面后即可隐藏光标并自由观察，按 `Esc` 恢复光标。
+        </section>
+
+        <section class="panel">
+          <label>
+            <span>时间</span>
+            <input id="dateInput" type="datetime-local" />
+          </label>
+          <label>
+            <span>时间流速</span>
+            <input id="timeScale" type="range" min="-2000" max="2000" value="1" step="1" />
+            <output id="timeScaleValue">1x</output>
+          </label>
+          <div class="button-row">
+            <button id="pauseBtn" type="button">暂停时间</button>
+            <button id="nowBtn" type="button">回到现在</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <label>
+            <span>飞行速度</span>
+            <input id="moveSpeed" type="range" min="1" max="400" value="30" step="1" />
+            <output id="moveSpeedValue">30</output>
+          </label>
+          <label>
+            <span>目标天体</span>
+            <select id="bodySelect"></select>
+          </label>
+          <div class="button-row">
+            <button id="focusBtn" type="button">观察目标</button>
+            <button id="landBtn" type="button">降落到表面</button>
+          </div>
+          <div class="button-row">
+            <button id="toggleLabelsBtn" class="secondary" type="button">隐藏名称</button>
+            <button id="resetCameraBtn" class="secondary" type="button">重置相机</button>
+          </div>
+        </section>
+
+        <section class="panel compact">
+          <h2>操作</h2>
+          <p>点击画面锁定鼠标视角，WASD 平移，E/Q 或 R/F 升降，Shift 加速，Ctrl 微调。</p>
+          <p>点击天体即可选中；观察目标会飞到附近，降落会贴附到表面并跟随天体运动。</p>
+        </section>
+
+        <section class="panel compact info-panel">
+          <h2 id="infoName">Sun</h2>
+          <p id="infoText">载入中...</p>
+        </section>
+      </aside>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
+
