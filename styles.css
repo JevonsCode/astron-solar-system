@@ -8,8 +8,14 @@
   --accent: #6fd3ff;
   --accent-strong: #ffd36f;
   --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  --mobile-safe-bottom: calc(env(safe-area-inset-bottom) + 58px);
-  --mobile-safe-top: calc(env(safe-area-inset-top) + 10px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --mobile-top-gap: calc(var(--safe-top) + 14px);
+  --mobile-side-gap: 10px;
+  --mobile-bottom-gap: calc(var(--safe-bottom) + 54px);
+  --mobile-bottom-gap-compact: calc(var(--safe-bottom) + 74px);
 }
 
 * {
@@ -65,6 +71,7 @@ button,
   position: relative;
   width: 100vw;
   height: 100vh;
+  min-height: 100dvh;
 }
 
 #scene {
@@ -257,8 +264,8 @@ output {
   .mobile-hud-toggle {
     display: inline-flex;
     position: absolute;
-    right: 10px;
-    top: var(--mobile-safe-top);
+    right: calc(var(--safe-right) + var(--mobile-side-gap));
+    top: var(--mobile-top-gap);
     z-index: 30;
     width: auto;
     min-height: 40px;
@@ -272,9 +279,13 @@ output {
   }
 
   .hud {
-    inset: auto 10px calc(var(--mobile-safe-bottom) + 24px) 10px;
-    max-height: min(54dvh, 520px);
-    padding: 14px 14px calc(18px + env(safe-area-inset-bottom) + 18px);
+    left: calc(var(--safe-left) + var(--mobile-side-gap));
+    right: calc(var(--safe-right) + var(--mobile-side-gap));
+    top: auto;
+    bottom: var(--mobile-bottom-gap);
+    width: auto;
+    max-height: min(520px, calc(100dvh - var(--mobile-top-gap) - var(--mobile-bottom-gap) - 24px));
+    padding: 14px 14px calc(18px + var(--safe-bottom) + 18px);
     border-radius: 18px;
     background:
       linear-gradient(180deg, rgba(14, 20, 34, 0.94), rgba(7, 12, 21, 0.86)),
@@ -328,14 +339,14 @@ output {
   }
 
   .info-panel {
-    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    padding-bottom: calc(18px + var(--safe-bottom));
   }
 
   .mobile-flight-pad {
     display: grid;
     position: absolute;
-    left: 10px;
-    bottom: calc(env(safe-area-inset-bottom) + 52px);
+    left: calc(var(--safe-left) + var(--mobile-side-gap));
+    bottom: calc(var(--safe-bottom) + 52px);
     z-index: 25;
     width: 156px;
     height: 156px;
@@ -389,16 +400,18 @@ output {
 
 @media (max-width: 420px) {
   .hud {
-    inset: auto 8px calc(env(safe-area-inset-bottom) + 76px) 8px;
-    max-height: 56dvh;
-    padding: 12px 12px calc(18px + env(safe-area-inset-bottom) + 16px);
+    left: calc(var(--safe-left) + 8px);
+    right: calc(var(--safe-right) + 8px);
+    bottom: var(--mobile-bottom-gap-compact);
+    max-height: calc(100dvh - var(--mobile-top-gap) - var(--mobile-bottom-gap-compact) - 18px);
+    padding: 12px 12px calc(18px + var(--safe-bottom) + 16px);
   }
 
   .mobile-flight-pad {
     width: 138px;
     height: 138px;
-    left: 8px;
-    bottom: calc(env(safe-area-inset-bottom) + 46px);
+    left: calc(var(--safe-left) + 8px);
+    bottom: calc(var(--safe-bottom) + 46px);
   }
 
   .brand h1 {
