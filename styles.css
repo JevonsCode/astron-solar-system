@@ -12,7 +12,7 @@
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
-  --mobile-top-gap: calc(var(--safe-top) + 14px);
+  --mobile-top-gap: calc(var(--safe-top) + 44px);
   --mobile-side-gap: 10px;
   --mobile-bottom-gap: calc(var(--safe-bottom) + 54px);
   --mobile-bottom-gap-compact: calc(var(--safe-bottom) + 74px);
@@ -345,7 +345,7 @@ output {
     display: grid;
     position: absolute;
     left: calc(var(--safe-left) + var(--mobile-side-gap));
-    bottom: calc(var(--safe-bottom) + 52px);
+    bottom: calc(var(--safe-bottom) + 112px);
     z-index: 25;
     width: 156px;
     height: 156px;
@@ -360,6 +360,11 @@ output {
     min-height: 0;
     width: 100%;
     height: 100%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: manipulation;
     border-radius: 18px;
     border: 1px solid rgba(157, 190, 238, 0.2);
     background: rgba(7, 15, 28, 0.72);
@@ -410,7 +415,7 @@ output {
     width: 138px;
     height: 138px;
     left: calc(var(--safe-left) + 8px);
-    bottom: calc(var(--safe-bottom) + 46px);
+    bottom: calc(var(--safe-bottom) + 106px);
   }
 
   .brand h1 {
