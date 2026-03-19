@@ -44,6 +44,8 @@ const ui = {
   cursorHint: document.querySelector("#cursorHint"),
 };
 
+const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+
 const state = {
   simDate: new Date(),
   timeScale: Number(ui.timeScale.value),
@@ -58,6 +60,15 @@ const state = {
   autopilot: null,
   landed: null,
   movement: { forward: 0, right: 0, up: 0 },
+  touch: {
+    active: false,
+    moved: false,
+    lastX: 0,
+    lastY: 0,
+    lastTapX: 0,
+    lastTapY: 0,
+    pinchDistance: 0,
+  },
 };
 
 const raycaster = new THREE.Raycaster();
@@ -130,6 +141,10 @@ window.addEventListener("pointerup", () => { state.dragging = false; });
 renderer.domElement.addEventListener("click", onClickSelect);
 renderer.domElement.addEventListener("wheel", onWheelMove, { passive: false });
 renderer.domElement.addEventListener("contextmenu", onContextMenu);
+renderer.domElement.addEventListener("touchstart", onTouchStart, { passive: false });
+renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false });
+renderer.domElement.addEventListener("touchend", onTouchEnd, { passive: false });
+renderer.domElement.addEventListener("touchcancel", onTouchEnd, { passive: false });
 document.addEventListener("pointerlockchange", updateCursorHint);
 
 ui.timeScale.addEventListener("input", () => {
@@ -271,7 +286,9 @@ function updateLandedState() {
 function startAutopilot(bodyId, land) {
   const body = bodyMap.get(bodyId);
   if (land && body.id === "sun") return;
-  const offset = land ? new THREE.Vector3(0, getVisualRadius(body) * 0.15, getLandingRadius(body)) : new THREE.Vector3(getVisualRadius(body) * 4.5 + 1, getVisualRadius(body) * 1.4 + 0.5, getVisualRadius(body) * 6.2 + 1.2);
+  const offset = land
+    ? new THREE.Vector3(0, getVisualRadius(body) * 0.15, getLandingRadius(body))
+    : new THREE.Vector3(getVisualRadius(body) * 4.5 + 1, getVisualRadius(body) * 1.4 + 0.5, getVisualRadius(body) * 6.2 + 1.2);
   state.autopilot = { bodyId, from: camera.position.clone(), to: body.worldPosition.clone().add(offset), t: 0, duration: land ? 2.8 : 2.2, land };
   state.landed = null;
 }
@@ -298,6 +315,10 @@ function updateLabelVisibility() {
 function updateCursorHint() {
   const locked = document.pointerLockElement === renderer.domElement;
   ui.cursorHint.classList.toggle("is-active", locked);
+  if (isTouchDevice) {
+    ui.cursorHint.innerHTML = "<strong>移动端触控：</strong>单指旋转视角，双指捏合可前后移动，轻点天体即可选中。";
+    return;
+  }
   ui.cursorHint.innerHTML = locked
     ? "<strong>飞行视角已锁定：</strong>移动鼠标可转向，滚轮前后移动，右键或 Esc 退出锁定。"
     : "<strong>鼠标未锁定：</strong>点击右侧宇宙画面后即可隐藏光标并自由观察，右键或 Esc 恢复光标。";
@@ -349,6 +370,7 @@ function onKey(event) {
 }
 
 function onPointerDown(event) {
+  if (isTouchDevice) return;
   if (event.target !== renderer.domElement) return;
   if (event.button === 2) {
     document.exitPointerLock?.();
@@ -359,6 +381,7 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
+  if (isTouchDevice) return;
   if (!state.dragging && document.pointerLockElement !== renderer.domElement) return;
   state.yaw -= event.movementX * 0.003;
   state.pitch -= event.movementY * 0.0024;
@@ -366,20 +389,12 @@ function onPointerMove(event) {
 }
 
 function onClickSelect(event) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(clickable, false);
-  if (hits.length) setSelectedBody(hits[0].object.userData.bodyId);
+  onScreenSelect(event.clientX, event.clientY);
 }
 
 function onWheelMove(event) {
   event.preventDefault();
-  cameraEuler.set(state.pitch, state.yaw, 0);
-  wheelDirection.set(0, 0, event.deltaY > 0 ? 1 : -1).applyQuaternion(tempQuat.setFromEuler(cameraEuler));
-  if (state.landed) state.landed = null;
-  camera.position.add(wheelDirection.multiplyScalar(Math.max(0.8, state.moveSpeed * 0.35)));
+  moveForwardBy((event.deltaY > 0 ? -1 : 1) * Math.max(0.8, state.moveSpeed * 0.35));
 }
 
 function onContextMenu(event) {
@@ -387,15 +402,92 @@ function onContextMenu(event) {
   document.exitPointerLock?.();
 }
 
+function onTouchStart(event) {
+  if (!isTouchDevice || event.target !== renderer.domElement) return;
+  event.preventDefault();
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    state.touch.active = true;
+    state.touch.moved = false;
+    state.touch.lastX = touch.clientX;
+    state.touch.lastY = touch.clientY;
+    state.touch.lastTapX = touch.clientX;
+    state.touch.lastTapY = touch.clientY;
+  } else if (event.touches.length >= 2) {
+    state.touch.active = false;
+    state.touch.moved = true;
+    state.touch.pinchDistance = getTouchDistance(event.touches[0], event.touches[1]);
+  }
+}
+
+function onTouchMove(event) {
+  if (!isTouchDevice || event.target !== renderer.domElement) return;
+  event.preventDefault();
+  if (event.touches.length === 1 && state.touch.active) {
+    const touch = event.touches[0];
+    const dx = touch.clientX - state.touch.lastX;
+    const dy = touch.clientY - state.touch.lastY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) state.touch.moved = true;
+    state.yaw -= dx * 0.0052;
+    state.pitch -= dy * 0.0042;
+    state.pitch = THREE.MathUtils.clamp(state.pitch, -Math.PI / 2 + 0.03, Math.PI / 2 - 0.03);
+    state.touch.lastX = touch.clientX;
+    state.touch.lastY = touch.clientY;
+  } else if (event.touches.length >= 2) {
+    const nextDistance = getTouchDistance(event.touches[0], event.touches[1]);
+    const delta = nextDistance - state.touch.pinchDistance;
+    if (Math.abs(delta) > 1) {
+      moveForwardBy(delta * 0.12);
+      state.touch.moved = true;
+    }
+    state.touch.pinchDistance = nextDistance;
+  }
+}
+
+function onTouchEnd(event) {
+  if (!isTouchDevice) return;
+  event.preventDefault();
+  if (event.touches.length >= 2) {
+    state.touch.active = false;
+    state.touch.pinchDistance = getTouchDistance(event.touches[0], event.touches[1]);
+    return;
+  }
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    state.touch.active = true;
+    state.touch.lastX = touch.clientX;
+    state.touch.lastY = touch.clientY;
+    state.touch.pinchDistance = 0;
+    return;
+  }
+  if (!state.touch.moved) {
+    onScreenSelect(state.touch.lastTapX, state.touch.lastTapY);
+  }
+  state.touch.active = false;
+  state.touch.pinchDistance = 0;
+}
+
+function getTouchDistance(a, b) {
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+function moveForwardBy(amount) {
+  cameraEuler.set(state.pitch, state.yaw, 0);
+  wheelDirection.set(0, 0, amount < 0 ? 1 : -1).applyQuaternion(tempQuat.setFromEuler(cameraEuler));
+  if (state.landed) state.landed = null;
+  camera.position.add(wheelDirection.multiplyScalar(Math.max(0.6, Math.abs(amount))));
+}
+
+function onScreenSelect(clientX, clientY) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(clickable, false);
+  if (hits.length) setSelectedBody(hits[0].object.userData.bodyId);
+}
+
 function syncDateInput() {
   const local = new Date(state.simDate.getTime() - state.simDate.getTimezoneOffset() * 60000);
   ui.dateInput.value = local.toISOString().slice(0, 16);
 }
-
-
-
-
-
-
-
-
