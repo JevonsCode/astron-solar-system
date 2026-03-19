@@ -42,6 +42,8 @@ const ui = {
   infoName: document.querySelector("#infoName"),
   infoText: document.querySelector("#infoText"),
   cursorHint: document.querySelector("#cursorHint"),
+  hud: document.querySelector(".hud"),
+  mobileHudToggle: document.querySelector("#mobileHudToggle"),
 };
 
 const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
@@ -69,6 +71,7 @@ const state = {
     lastTapY: 0,
     pinchDistance: 0,
   },
+  mobileHudCollapsed: false,
 };
 
 const raycaster = new THREE.Raycaster();
@@ -82,6 +85,7 @@ const labelRightDirection = new THREE.Vector3();
 const bodyMap = new Map();
 const clickable = [];
 const skyMarkers = new Map();
+const mobilePadButtons = Array.from(document.querySelectorAll(".flight-key"));
 let lastFrameTime = performance.now();
 
 for (const def of bodyDefs) {
@@ -146,6 +150,14 @@ renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false 
 renderer.domElement.addEventListener("touchend", onTouchEnd, { passive: false });
 renderer.domElement.addEventListener("touchcancel", onTouchEnd, { passive: false });
 document.addEventListener("pointerlockchange", updateCursorHint);
+ui.mobileHudToggle?.addEventListener("click", toggleMobileHud);
+
+for (const button of mobilePadButtons) {
+  button.addEventListener("pointerdown", onMobilePadPress);
+  button.addEventListener("pointerup", onMobilePadRelease);
+  button.addEventListener("pointerleave", onMobilePadRelease);
+  button.addEventListener("pointercancel", onMobilePadRelease);
+}
 
 ui.timeScale.addEventListener("input", () => {
   state.timeScale = Number(ui.timeScale.value);
@@ -316,7 +328,7 @@ function updateCursorHint() {
   const locked = document.pointerLockElement === renderer.domElement;
   ui.cursorHint.classList.toggle("is-active", locked);
   if (isTouchDevice) {
-    ui.cursorHint.innerHTML = "<strong>移动端触控：</strong>单指旋转视角，双指捏合可前后移动，轻点天体即可选中。";
+    ui.cursorHint.innerHTML = "<strong>移动端触控：</strong>单指旋转视角，双指捏合负责前后移动，方向键控制 AD / RF，轻点天体即可选中。";
     return;
   }
   ui.cursorHint.innerHTML = locked
@@ -349,6 +361,14 @@ function resetCamera() {
   state.pitch = -0.1;
   state.autopilot = null;
   state.landed = null;
+}
+
+function toggleMobileHud() {
+  if (!isTouchDevice) return;
+  state.mobileHudCollapsed = !state.mobileHudCollapsed;
+  ui.hud.classList.toggle("is-collapsed", state.mobileHudCollapsed);
+  ui.mobileHudToggle.textContent = state.mobileHudCollapsed ? "展开面板" : "收起面板";
+  ui.mobileHudToggle.setAttribute("aria-expanded", String(!state.mobileHudCollapsed));
 }
 
 function onResize() {
@@ -465,6 +485,27 @@ function onTouchEnd(event) {
   }
   state.touch.active = false;
   state.touch.pinchDistance = 0;
+}
+
+function onMobilePadPress(event) {
+  if (!isTouchDevice) return;
+  event.preventDefault();
+  const button = event.currentTarget;
+  const axis = button.dataset.moveAxis;
+  const value = Number(button.dataset.moveValue);
+  if (!axis || Number.isNaN(value)) return;
+  button.classList.add("is-active");
+  state.movement[axis] = value;
+}
+
+function onMobilePadRelease(event) {
+  if (!isTouchDevice) return;
+  const button = event.currentTarget;
+  const axis = button.dataset.moveAxis;
+  const value = Number(button.dataset.moveValue);
+  button.classList.remove("is-active");
+  if (!axis || Number.isNaN(value)) return;
+  if (state.movement[axis] === value) state.movement[axis] = 0;
 }
 
 function getTouchDistance(a, b) {

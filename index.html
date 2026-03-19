@@ -9,6 +9,7 @@
   <body>
     <div id="app">
       <canvas id="scene"></canvas>
+      <button id="mobileHudToggle" class="mobile-hud-toggle" type="button" aria-expanded="true">收起面板</button>
       <aside class="hud glass">
         <div class="brand">
           <p class="eyebrow">Interactive Orrery</p>
@@ -59,7 +60,7 @@
         <section class="panel compact">
           <h2>操作</h2>
           <p>桌面端可点击画面锁定鼠标视角，WASD 平移，E/Q 或 R/F 升降，Shift 加速，Ctrl 微调。</p>
-          <p>移动端支持单指旋转视角、双指缩放前后移动，轻点天体可选中目标。</p>
+          <p>移动端支持单指旋转视角、双指缩放前后移动，虚拟方向键控制 AD / RF，轻点天体可选中目标。</p>
           <p>点击或轻点天体即可选中；观察目标会飞到附近，降落会贴附到表面并跟随天体运动。</p>
         </section>
 
@@ -68,6 +69,13 @@
           <p id="infoText">载入中...</p>
         </section>
       </aside>
+
+      <div class="mobile-flight-pad" id="mobileFlightPad" aria-label="移动端飞行方向键">
+        <button class="flight-key flight-key-up" data-move-axis="up" data-move-value="1" type="button">R</button>
+        <button class="flight-key flight-key-left" data-move-axis="right" data-move-value="-1" type="button">A</button>
+        <button class="flight-key flight-key-right" data-move-axis="right" data-move-value="1" type="button">D</button>
+        <button class="flight-key flight-key-down" data-move-axis="up" data-move-value="-1" type="button">F</button>
+      </div>
     </div>
 
     <script type="module" src="./src/main.js"></script>
