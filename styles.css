@@ -52,6 +52,15 @@ select {
   font: inherit;
 }
 
+button,
+.mobile-hud-toggle,
+.flight-key {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 #app {
   position: relative;
   width: 100vw;
@@ -263,7 +272,7 @@ output {
   }
 
   .hud {
-    inset: auto 10px var(--mobile-safe-bottom) 10px;
+    inset: auto 10px calc(var(--mobile-safe-bottom) + 24px) 10px;
     max-height: min(54dvh, 520px);
     padding: 14px 14px calc(18px + env(safe-area-inset-bottom) + 18px);
     border-radius: 18px;
@@ -326,7 +335,7 @@ output {
     display: grid;
     position: absolute;
     left: 10px;
-    bottom: calc(env(safe-area-inset-bottom) + 28px);
+    bottom: calc(env(safe-area-inset-bottom) + 52px);
     z-index: 25;
     width: 156px;
     height: 156px;
@@ -380,7 +389,7 @@ output {
 
 @media (max-width: 420px) {
   .hud {
-    inset: auto 8px calc(env(safe-area-inset-bottom) + 52px) 8px;
+    inset: auto 8px calc(env(safe-area-inset-bottom) + 76px) 8px;
     max-height: 56dvh;
     padding: 12px 12px calc(18px + env(safe-area-inset-bottom) + 16px);
   }
@@ -389,7 +398,7 @@ output {
     width: 138px;
     height: 138px;
     left: 8px;
-    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    bottom: calc(env(safe-area-inset-bottom) + 46px);
   }
 
   .brand h1 {
