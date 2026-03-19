@@ -48,6 +48,36 @@ const ui = {
 
 const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 
+const englishNames = {
+  sun: "Sun",
+  mercury: "Mercury",
+  venus: "Venus",
+  earth: "Earth",
+  moon: "Moon",
+  mars: "Mars",
+  phobos: "Phobos",
+  deimos: "Deimos",
+  jupiter: "Jupiter",
+  io: "Io",
+  europa: "Europa",
+  ganymede: "Ganymede",
+  callisto: "Callisto",
+  himalia: "Himalia",
+  pasiphae: "Pasiphae",
+  sinope: "Sinope",
+  saturn: "Saturn",
+  mimas: "Mimas",
+  enceladus: "Enceladus",
+  tethys: "Tethys",
+  dione: "Dione",
+  rhea: "Rhea",
+  titan: "Titan",
+  iapetus: "Iapetus",
+  uranus: "Uranus",
+  neptune: "Neptune",
+  triton: "Triton",
+};
+
 const state = {
   simDate: new Date(),
   timeScale: Number(ui.timeScale.value),
@@ -95,7 +125,7 @@ for (const def of bodyDefs) {
   pivot.add(mesh);
   root.add(pivot);
 
-  const label = createBodyLabel(def.name);
+  const label = createBodyLabel(def.name, englishNames[def.id] || def.name);
   label.position.y = def.id === "sun" ? 16 : getVisualRadius(def) + 0.7;
   pivot.add(label);
 
@@ -532,3 +562,6 @@ function syncDateInput() {
   const local = new Date(state.simDate.getTime() - state.simDate.getTimezoneOffset() * 60000);
   ui.dateInput.value = local.toISOString().slice(0, 16);
 }
+
+
+

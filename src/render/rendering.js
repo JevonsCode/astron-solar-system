@@ -70,7 +70,7 @@ export function createSkyMarker(text, color = "#ffffff") {
   return new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false }));
 }
 
-export function createBodyLabel(text) {
+export function createBodyLabel(text, subtitle = "") {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 144;
@@ -88,7 +88,7 @@ export function createBodyLabel(text) {
   ctx.font = "600 18px Segoe UI";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("SOLAR BODY", 256, 48);
+  ctx.fillText(subtitle || text, 256, 48);
   ctx.fillStyle = "#ecf4ff";
   ctx.font = "700 32px Segoe UI";
   ctx.fillText(text, 256, 82);
@@ -375,3 +375,4 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
 }
+
