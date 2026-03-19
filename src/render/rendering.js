@@ -4,6 +4,7 @@ import { getMoonOffsetAtAngle, getPlanetDisplayPosition, getPlanetOrbitalPeriodD
 
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
+const ZERO_SUN = new THREE.Vector3(0, 0, 0);
 
 export function createBodyMesh(def) {
   const radius = getVisualRadius(def);
@@ -20,23 +21,8 @@ export function createBodyMesh(def) {
       emissive: new THREE.Color("#ffb347"),
       emissiveIntensity: 2.6,
     });
-  } else if (def.type === "earth") {
-    material = new THREE.MeshStandardMaterial({
-      map: fallbackTexture,
-      color: new THREE.Color("#ffffff"),
-      roughness: 0.96,
-      metalness: 0,
-      emissive: new THREE.Color("#0a1220"),
-      emissiveIntensity: 0.018,
-    });
   } else {
-    material = new THREE.MeshPhongMaterial({
-      map: fallbackTexture,
-      shininess: def.type === "ice" ? 6 : 4,
-      specular: new THREE.Color(def.type === "ice" ? "#28384d" : "#121212"),
-      emissive: new THREE.Color("#000000"),
-      emissiveIntensity: 0,
-    });
+    material = createCelestialMaterial(def, fallbackTexture);
   }
 
   const mesh = new THREE.Mesh(geometry, material);
@@ -50,7 +36,9 @@ export function createBodyMesh(def) {
     textureLoader.load(textureUrl, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = 8;
-      material.map = texture;
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+      material.uniforms.map.value = texture;
       material.needsUpdate = true;
     });
   }
@@ -197,6 +185,83 @@ export function createSunGlow() {
   return new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, color: 0xffb547, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
 }
 
+function createCelestialMaterial(def, texture) {
+  const { ambientFloor, specularStrength, specularPower, rimStrength, rimColor } = getLightingProfile(def);
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      map: { value: texture },
+      sunPosition: { value: ZERO_SUN.clone() },
+      ambientFloor: { value: ambientFloor },
+      specularStrength: { value: specularStrength },
+      specularPower: { value: specularPower },
+      rimStrength: { value: rimStrength },
+      rimColor: { value: new THREE.Color(rimColor) },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vWorldPosition;
+      varying vec3 vWorldNormal;
+
+      void main() {
+        vUv = uv;
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPosition.xyz;
+        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * worldPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D map;
+      uniform vec3 sunPosition;
+      uniform float ambientFloor;
+      uniform float specularStrength;
+      uniform float specularPower;
+      uniform float rimStrength;
+      uniform vec3 rimColor;
+
+      varying vec2 vUv;
+      varying vec3 vWorldPosition;
+      varying vec3 vWorldNormal;
+
+      void main() {
+        vec3 albedo = texture2D(map, vUv).rgb;
+        vec3 normal = normalize(vWorldNormal);
+        vec3 lightDir = normalize(sunPosition - vWorldPosition);
+        vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+
+        float diffuse = max(dot(normal, lightDir), 0.0);
+        float lightMix = ambientFloor + pow(diffuse, 0.92) * (1.0 - ambientFloor);
+
+        vec3 reflected = reflect(-lightDir, normal);
+        float specular = pow(max(dot(reflected, viewDir), 0.0), specularPower) * specularStrength * step(0.001, diffuse);
+        float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.4) * rimStrength * step(0.02, diffuse + ambientFloor);
+
+        vec3 color = albedo * lightMix;
+        color += vec3(specular);
+        color += rimColor * fresnel;
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `,
+  });
+}
+
+function getLightingProfile(def) {
+  if (def.type === "earth") {
+    return { ambientFloor: 0.035, specularStrength: 0.08, specularPower: 28, rimStrength: 0.12, rimColor: "#7fd7ff" };
+  }
+  if (def.type === "cloudy" || def.type === "hazy") {
+    return { ambientFloor: 0.05, specularStrength: 0.03, specularPower: 18, rimStrength: 0.1, rimColor: "#ffd7a4" };
+  }
+  if (def.type === "gas" || def.type === "gasBand" || def.type === "iceGiant") {
+    return { ambientFloor: 0.06, specularStrength: 0.035, specularPower: 20, rimStrength: 0.05, rimColor: "#f2f7ff" };
+  }
+  if (def.type === "ice") {
+    return { ambientFloor: 0.03, specularStrength: 0.02, specularPower: 16, rimStrength: 0.03, rimColor: "#dfe8ff" };
+  }
+  return { ambientFloor: 0.025, specularStrength: 0.015, specularPower: 14, rimStrength: 0.02, rimColor: "#d7e0ee" };
+}
+
 function createAtmosphereShell(radius, type) {
   const color = type === "earth" ? 0x7fd7ff : type === "cloudy" ? 0xffd29b : 0xffc56b;
   return new THREE.Mesh(new THREE.SphereGeometry(radius * 1.045, 48, 48), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: type === "earth" ? 0.11 : type === "cloudy" ? 0.13 : 0.1, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -310,5 +375,3 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
 }
-
-
