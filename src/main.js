@@ -38,6 +38,7 @@ const ui = {
   focusBtn: document.querySelector("#focusBtn"),
   landBtn: document.querySelector("#landBtn"),
   toggleLabelsBtn: document.querySelector("#toggleLabelsBtn"),
+  toggleOrbitsBtn: document.querySelector("#toggleOrbitsBtn"),
   resetCameraBtn: document.querySelector("#resetCameraBtn"),
   infoName: document.querySelector("#infoName"),
   infoText: document.querySelector("#infoText"),
@@ -85,6 +86,7 @@ const state = {
   moveSpeed: Number(ui.moveSpeed.value),
   selectedBodyId: "earth",
   showLabels: true,
+  showOrbits: true,
   yaw: -0.3,
   pitch: -0.1,
   dragging: false,
@@ -211,6 +213,7 @@ ui.bodySelect.addEventListener("change", () => setSelectedBody(ui.bodySelect.val
 ui.focusBtn.addEventListener("click", () => startAutopilot(state.selectedBodyId, false));
 ui.landBtn.addEventListener("click", () => startAutopilot(state.selectedBodyId, true));
 ui.toggleLabelsBtn.addEventListener("click", () => { state.showLabels = !state.showLabels; updateLabelVisibility(); });
+ui.toggleOrbitsBtn.addEventListener("click", () => { state.showOrbits = !state.showOrbits; updateOrbitVisibility(); });
 ui.resetCameraBtn.addEventListener("click", resetCamera);
 
 resetCamera();
@@ -218,6 +221,7 @@ syncDateInput();
 setSelectedBody(state.selectedBodyId);
 updateCursorHint();
 updateLabelVisibility();
+updateOrbitVisibility();
 animate();
 
 function animate() {
@@ -352,6 +356,13 @@ function setSelectedBody(id) {
 function updateLabelVisibility() {
   for (const body of bodyMap.values()) body.label.visible = state.showLabels;
   ui.toggleLabelsBtn.textContent = state.showLabels ? "隐藏名称" : "显示名称";
+}
+
+function updateOrbitVisibility() {
+  for (const body of bodyMap.values()) {
+    if (body.orbitLine) body.orbitLine.visible = state.showOrbits;
+  }
+  ui.toggleOrbitsBtn.textContent = state.showOrbits ? "隐藏轨道" : "显示轨道";
 }
 
 function updateCursorHint() {
@@ -562,6 +573,10 @@ function syncDateInput() {
   const local = new Date(state.simDate.getTime() - state.simDate.getTimezoneOffset() * 60000);
   ui.dateInput.value = local.toISOString().slice(0, 16);
 }
+
+
+
+
 
 
 

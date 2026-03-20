@@ -156,7 +156,7 @@ export function createSaturnRing(radius) {
     positions[i * 3] = Math.cos(a) * r;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 0.05;
     positions[i * 3 + 2] = Math.sin(a) * r;
-    color.setHSL(0.11, 0.36, 0.62 + Math.random() * 0.16);
+    color.setHSL(0.11, 0.22, 0.45 + Math.random() * 0.1);
     colors[i * 3] = color.r;
     colors[i * 3 + 1] = color.g;
     colors[i * 3 + 2] = color.b;
@@ -164,7 +164,7 @@ export function createSaturnRing(radius) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  const ring = new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.03, vertexColors: true, transparent: true, opacity: 0.88, depthWrite: false }));
+  const ring = new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.024, vertexColors: true, transparent: true, opacity: 0.56, depthWrite: false }));
   ring.rotation.x = Math.PI / 2.7;
   return ring;
 }
@@ -375,4 +375,5 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
 }
+
 
