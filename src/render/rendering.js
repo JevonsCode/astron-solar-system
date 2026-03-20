@@ -10,11 +10,12 @@ export function createBodyMesh(def) {
   const radius = getVisualRadius(def);
   const geometry = new THREE.SphereGeometry(radius, def.id === "sun" ? 64 : 48, def.id === "sun" ? 64 : 48);
   const fallbackTexture = createFallbackTexture(def);
+  const textureUrl = textureSources[def.id];
 
   let material;
   if (def.id === "sun") {
     material = new THREE.MeshStandardMaterial({
-      map: null,
+      map: fallbackTexture,
       emissiveMap: fallbackTexture,
       roughness: 0.98,
       metalness: 0.02,
@@ -31,14 +32,18 @@ export function createBodyMesh(def) {
     mesh.add(createAtmosphereShell(radius, def.type));
   }
 
-  const textureUrl = textureSources[def.id];
-  if (textureUrl && def.id !== "sun") {
+  if (textureUrl) {
     textureLoader.load(textureUrl, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = 8;
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.ClampToEdgeWrapping;
-      material.uniforms.map.value = texture;
+      if (def.id === "sun") {
+        material.map = texture;
+        material.emissiveMap = texture;
+      } else {
+        material.uniforms.map.value = texture;
+      }
       material.needsUpdate = true;
     });
   }

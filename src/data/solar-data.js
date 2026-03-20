@@ -2,16 +2,32 @@ export const AU_KM = 149597870.7;
 export const DEG = Math.PI / 180;
 export const RADIUS_SCALE = 20 / 696340;
 
+const assetTexture = (file) => new URL(`../../assets/textures/${file}`, import.meta.url).href;
+
 export const textureSources = {
-  mercury: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg",
-  venus: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/venus.jpg",
-  earth: "https://svs.gsfc.nasa.gov/vis/a000000/a002900/a002915/bluemarble-2048.png",
-  moon: "https://astrogeology.usgs.gov/ckan/dataset/359afbec-7f0d-4020-9453-3fb57f8ea651/resource/91f58a2f-64bb-4c81-9978-babfd65b1c41/download/lunar_clementine_uvvis_750nm_global_mosaic_1024.jpg",
-  mars: "https://astrogeology.usgs.gov/ckan/dataset/7131d503-cdc9-45a5-8f83-5126c0fd397e/resource/6afad901-1caa-48a7-8b62-3911da0004c2/download/mars_viking_mdim21_clrmosaic_global_1024.jpg",
-  jupiter: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg",
-  saturn: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg",
-  uranus: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg",
-  neptune: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg",
+  sun: assetTexture("sun.jpg"),
+  mercury: assetTexture("mercury.jpg"),
+  venus: assetTexture("venus.jpg"),
+  earth: assetTexture("earth.png"),
+  moon: assetTexture("moon.jpg"),
+  mars: assetTexture("mars.jpg"),
+  jupiter: assetTexture("jupiter.jpg"),
+  saturn: assetTexture("saturn.jpg"),
+  uranus: assetTexture("uranus.jpg"),
+  neptune: assetTexture("neptune.jpg"),
+};
+
+export const textureCredits = {
+  sun: "https://www.solarsystemscope.com/textures/",
+  mercury: "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_global_color_mosaic_665m",
+  venus: "https://www.solarsystemscope.com/textures/",
+  earth: "https://svs.gsfc.nasa.gov/2915/",
+  moon: "https://astrogeology.usgs.gov/search/map/moon_clementine_uvvis_global_mosaic_118m",
+  mars: "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m",
+  jupiter: "https://www.solarsystemscope.com/textures/",
+  saturn: "https://www.solarsystemscope.com/textures/",
+  uranus: "https://www.solarsystemscope.com/textures/",
+  neptune: "https://www.solarsystemscope.com/textures/",
 };
 
 export const systemTilts = {
