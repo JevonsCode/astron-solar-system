@@ -3,9 +3,15 @@ export const DEG = Math.PI / 180;
 export const RADIUS_SCALE = 20 / 696340;
 
 export const textureSources = {
-  earth: "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
-  moon: "https://threejs.org/examples/textures/planets/moon_1024.jpg",
+  mercury: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg",
+  venus: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/venus.jpg",
+  earth: "https://svs.gsfc.nasa.gov/vis/a000000/a002900/a002915/bluemarble-2048.png",
+  moon: "https://astrogeology.usgs.gov/ckan/dataset/359afbec-7f0d-4020-9453-3fb57f8ea651/resource/91f58a2f-64bb-4c81-9978-babfd65b1c41/download/lunar_clementine_uvvis_750nm_global_mosaic_1024.jpg",
   mars: "https://astrogeology.usgs.gov/ckan/dataset/7131d503-cdc9-45a5-8f83-5126c0fd397e/resource/6afad901-1caa-48a7-8b62-3911da0004c2/download/mars_viking_mdim21_clrmosaic_global_1024.jpg",
+  jupiter: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/jupiter.jpg",
+  saturn: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/saturn.jpg",
+  uranus: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/uranus.jpg",
+  neptune: "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/neptune.jpg",
 };
 
 export const systemTilts = {
@@ -66,5 +72,7 @@ export const bodyDefs = [
   { id: "neptune", name: "海王星", type: "iceGiant", parent: "sun", orbit: { kind: "planet" }, radiusKm: 24622, colorA: "#3f6dff", colorB: "#1b2c92", rotationHours: 16.11, description: "深蓝色冰巨星。" },
   { id: "triton", name: "海卫一 Triton", type: "ice", parent: "neptune", orbit: { kind: "moon", distanceKm: 354760, periodDays: -5.877, inclinationDeg: 156.8, phaseDeg: 260 }, radiusKm: 1353.4, colorA: "#efe6dc", colorB: "#908782", rotationHours: 141.05, description: "逆行大卫星。" },
 ];
+
+
 
 
