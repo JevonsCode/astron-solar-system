@@ -6,7 +6,6 @@ export const textureSources = {
   earth: "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
   moon: "https://threejs.org/examples/textures/planets/moon_1024.jpg",
   mars: "https://astrogeology.usgs.gov/ckan/dataset/7131d503-cdc9-45a5-8f83-5126c0fd397e/resource/6afad901-1caa-48a7-8b62-3911da0004c2/download/mars_viking_mdim21_clrmosaic_global_1024.jpg",
-  jupiter: "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA07782.jpg"
 };
 
 export const systemTilts = {
@@ -67,4 +66,5 @@ export const bodyDefs = [
   { id: "neptune", name: "海王星", type: "iceGiant", parent: "sun", orbit: { kind: "planet" }, radiusKm: 24622, colorA: "#3f6dff", colorB: "#1b2c92", rotationHours: 16.11, description: "深蓝色冰巨星。" },
   { id: "triton", name: "海卫一 Triton", type: "ice", parent: "neptune", orbit: { kind: "moon", distanceKm: 354760, periodDays: -5.877, inclinationDeg: 156.8, phaseDeg: 260 }, radiusKm: 1353.4, colorA: "#efe6dc", colorB: "#908782", rotationHours: 141.05, description: "逆行大卫星。" },
 ];
+
 
